@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="HVvTSV" name="GenreGenie" projectType="audioplug" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
+  <MAINGROUP id="zmG8Yp" name="GenreGenie">
+    <GROUP id="{E829582A-FE43-37A5-BD9E-865542994114}" name="Source">
+      <FILE id="cmSIFw" name="PluginColorConstants.h" compile="0" resource="0"
+            file="Source/PluginColorConstants.h"/>
+      <FILE id="meZwqD" name="ChatBoxComponent.h" compile="0" resource="0"
+            file="Source/ChatBoxComponent.h"/>
+      <FILE id="w04Bn1" name="ChatBoxComponent.cpp" compile="1" resource="0"
+            file="Source/ChatBoxComponent.cpp"/>
+      <FILE id="Y5CllP" name="ChatGPTClient.h" compile="0" resource="0" file="Source/ChatGPTClient.h"/>
+      <FILE id="eIEqnV" name="ChatGPTClient.cpp" compile="1" resource="0"
+            file="Source/ChatGPTClient.cpp"/>
+      <FILE id="DhDu42" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="Tptqdf" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="vi01Je" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="opmvJ5" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+    <FILE id="Q1EHZv" name="config.json" compile="0" resource="1" file="config.json"/>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="GenreGenie"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="GenreGenie"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../juce-framework/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../juce-framework/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../juce-framework/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../juce-framework/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../juce-framework/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../juce-framework/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../juce-framework/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../juce-framework/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../juce-framework/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../juce-framework/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../juce-framework/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../juce-framework/JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../juce-framework/JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+  </EXPORTFORMATS>
+</JUCERPROJECT>
