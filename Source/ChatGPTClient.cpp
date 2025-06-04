@@ -9,13 +9,14 @@
 */
 
 #include "ChatGPTClient.h"
+#include "BinaryData.h"
 #include <fstream>
 
 ChatGPTClient::ChatGPTClient()
     : Thread("ChatGPTClientThread")
 {
     // Optional system message to establish context
-    const juce::String systemPrompt = "You are an expert audio engineer assistant. Your job is to listen to a user's prompt and output the appropriate EQ settings that would match the described genre, artist, or style. You will also be provided with the current state of the EQ settings in JSON format. You will return a JSON object that specifies the frequency, gain (in dB), and Q factor for each EQ band matching the format given in each prompt. You should focus on matching the tonal character and mix aesthetic described by the user. Use musical intuition and common mixing practices when making choices.";
+    const juce::String systemPrompt = "You are an expert audio engineer assistant. Your job is to listen to a user's prompt and output the appropriate EQ and Compressor settings that would match the described genre, artist, or style. You will also be provided with the current state of the EQ and Compressor settings in JSON format. You will return a JSON object that specifies the frequency, gain (in dB), and Q factor for each EQ band; the threshold, ratio, attack, and release for the compressor; the amount for the distortion; the time (ms), feedback, and mix percentage for the delay; and the size, decay (s), and mix percentage for the reverb.  Take care to match the format given in each prompt. You should focus on matching the tonal character and mix aesthetic described by the user. Use musical intuition and common mixing practices when making choices.";
 
     resetConversation(systemPrompt);  // <-- Reset chat on startup with system prompt
     startThread();

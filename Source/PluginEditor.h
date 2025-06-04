@@ -325,8 +325,8 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     
-    juce::String getEQStateJSON() const;
-    void applyEQSettingsFromJSON(const juce::String& jsonString);
+    juce::String getJSONFromParameters() const;
+    void applyParametersFromJSON(const juce::String& jsonString);
 
 private:
     // This reference is provided as a quick way for your editor to
@@ -342,7 +342,23 @@ private:
     lowCutSlopeSlider,
     highCutSlopeSlider;
     
+    RotarySliderWithLabels compThresholdSlider,
+    compRatioSlider,
+    compAttackSlider,
+    compReleaseSlider;
+    
+    RotarySliderWithLabels distortionAmountSlider;
+
+    RotarySliderWithLabels delayTimeSlider,
+                           delayFeedbackSlider,
+                           delayMixSlider;
+
+    RotarySliderWithLabels reverbSizeSlider,
+                           reverbDecaySlider,
+                           reverbMixSlider;
+    
     ResponseCurveComponent responseCurveComponent;
+    
     ChatGPTClient chatClient;
     
     using APVTS = juce::AudioProcessorValueTreeState;
@@ -355,18 +371,44 @@ private:
                 highCutFreqSliderAttachment,
                 lowCutSlopeSliderAttachment,
                 highCutSlopeSliderAttachment;
+    
+    Attachment compThresholdSliderAttachment,
+                compRatioSliderAttachment,
+                compAttackSliderAttachment,
+                compReleaseSliderAttachment;
+    
+    Attachment distortionAmountAttachment,
+               delayTimeAttachment,
+               delayFeedbackAttachment,
+               delayMixAttachment,
+               reverbSizeAttachment,
+               reverbDecayAttachment,
+               reverbMixAttachment;
 
     std::vector<juce::Component*> getComps();
     
     PowerButton lowcutBypassButton, peakBypassButton, highcutBypassButton;
+    PowerButton compBypassButton;
+    PowerButton distortionBypassButton;
+    PowerButton delayBypassButton;
+    PowerButton reverbBypassButton;
+
     AnalyzerButton analyzerEnabledButton;
     
     using ButtonAttachment = APVTS::ButtonAttachment;
     
     ButtonAttachment lowcutBypassButtonAttachment,
                         peakBypassButtonAttachment,
-                        highcutBypassButtonAttachment,
-                        analyzerEnabledButtonAttachment;
+                        highcutBypassButtonAttachment;
+    
+    ButtonAttachment compBypassButtonAttachment;
+    
+    ButtonAttachment distortionBypassAttachment,
+                     delayBypassAttachment,
+                     reverbBypassAttachment;
+    
+                        
+    ButtonAttachment analyzerEnabledButtonAttachment;
     
     LookAndFeel lnf;
     ChatBoxComponent chatBox;

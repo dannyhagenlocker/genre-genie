@@ -21,7 +21,7 @@
             file="Source/PluginEditor.cpp"/>
       <FILE id="opmvJ5" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
     </GROUP>
-    <FILE id="Q1EHZv" name="config.json" compile="0" resource="1" file="config.json"/>
+    <FILE id="G1gP0K" name="config.json" compile="0" resource="1" file="config.json"/>
   </MAINGROUP>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>

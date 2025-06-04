@@ -634,6 +634,20 @@ highCutFreqSlider(*audioProcessor.apvts.getParameter("HighCut Freq"), "Hz"),
 lowCutSlopeSlider(*audioProcessor.apvts.getParameter("LowCut Slope"), "dB/Oct"),
 highCutSlopeSlider(*audioProcessor.apvts.getParameter("HighCut Slope"), "db/Oct"),
 
+compThresholdSlider(*audioProcessor.apvts.getParameter("Comp Threshold"), "dB"),
+compRatioSlider(*audioProcessor.apvts.getParameter("Comp Ratio"), ":1"),
+compAttackSlider(*audioProcessor.apvts.getParameter("Comp Attack"), "ms"),
+compReleaseSlider(*audioProcessor.apvts.getParameter("Comp Release"), "ms"),
+
+distortionAmountSlider(*audioProcessor.apvts.getParameter("Distortion Amount"), ""),
+delayTimeSlider(*audioProcessor.apvts.getParameter("Delay Time"), "ms"),
+delayFeedbackSlider(*audioProcessor.apvts.getParameter("Delay Feedback"), ""),
+delayMixSlider(*audioProcessor.apvts.getParameter("Delay Mix"), "%"),
+reverbSizeSlider(*audioProcessor.apvts.getParameter("Reverb Size"), ""),
+reverbDecaySlider(*audioProcessor.apvts.getParameter("Reverb Decay"), "s"),
+reverbMixSlider(*audioProcessor.apvts.getParameter("Reverb Mix"), "%"),
+
+
 responseCurveComponent(audioProcessor),
 
 peakFreqSliderAttachment(audioProcessor.apvts, "Peak Freq", peakFreqSlider),
@@ -644,9 +658,26 @@ highCutFreqSliderAttachment(audioProcessor.apvts, "HighCut Freq", highCutFreqSli
 lowCutSlopeSliderAttachment(audioProcessor.apvts, "LowCut Slope", lowCutSlopeSlider),
 highCutSlopeSliderAttachment(audioProcessor.apvts, "HighCut Slope", highCutSlopeSlider),
 
+compThresholdSliderAttachment(audioProcessor.apvts, "Comp Threshold", compThresholdSlider),
+compRatioSliderAttachment(audioProcessor.apvts, "Comp Ratio", compRatioSlider),
+compAttackSliderAttachment(audioProcessor.apvts, "Comp Attack", compAttackSlider),
+compReleaseSliderAttachment(audioProcessor.apvts, "Comp Release", compReleaseSlider),
+
+distortionAmountAttachment(audioProcessor.apvts, "Distortion Amount", distortionAmountSlider),
+delayTimeAttachment(audioProcessor.apvts, "Delay Time", delayTimeSlider),
+delayFeedbackAttachment(audioProcessor.apvts, "Delay Feedback", delayFeedbackSlider),
+delayMixAttachment(audioProcessor.apvts, "Delay Mix", delayMixSlider),
+reverbSizeAttachment(audioProcessor.apvts, "Reverb Size", reverbSizeSlider),
+reverbDecayAttachment(audioProcessor.apvts, "Reverb Decay", reverbDecaySlider),
+reverbMixAttachment(audioProcessor.apvts, "Reverb Mix", reverbMixSlider),
+
 lowcutBypassButtonAttachment(audioProcessor.apvts, "LowCut Bypassed", lowcutBypassButton),
 peakBypassButtonAttachment(audioProcessor.apvts, "Peak Bypassed", peakBypassButton),
 highcutBypassButtonAttachment(audioProcessor.apvts, "HighCut Bypassed", highcutBypassButton),
+compBypassButtonAttachment(audioProcessor.apvts, "Comp Bypassed", compBypassButton),
+distortionBypassAttachment(audioProcessor.apvts, "Distortion Bypassed", distortionBypassButton),
+delayBypassAttachment(audioProcessor.apvts, "Delay Bypassed", delayBypassButton),
+reverbBypassAttachment(audioProcessor.apvts, "Reverb Bypassed", reverbBypassButton),
 analyzerEnabledButtonAttachment(audioProcessor.apvts, "Analyzer Enabled", analyzerEnabledButton)
 {
     peakFreqSlider.labels.add({0.f, "20Hz"});
@@ -670,6 +701,41 @@ analyzerEnabledButtonAttachment(audioProcessor.apvts, "Analyzer Enabled", analyz
     highCutSlopeSlider.labels.add({0.0f, "12"});
     highCutSlopeSlider.labels.add({1.f, "48"});
     
+    compThresholdSlider.labels.add({0.f, "-60dB"});
+    compThresholdSlider.labels.add({1.f, "0dB"});
+    compRatioSlider.labels.add({0.f, "1:1"});
+    compRatioSlider.labels.add({1.f, "20:1"});
+    compAttackSlider.labels.add({0.f, "1ms"});
+    compAttackSlider.labels.add({1.f, "100ms"});
+    compReleaseSlider.labels.add({0.f, "10ms"});
+    compReleaseSlider.labels.add({1.f, "500ms"});
+    
+    // Distortion
+    distortionAmountSlider.labels.add({ 0.f, "Soft" });
+    distortionAmountSlider.labels.add({ 1.f, "Hard" });
+
+    // Delay
+    delayTimeSlider.labels.add({ 0.f, "1ms" });
+    delayTimeSlider.labels.add({ 1.f, "2000ms" });
+
+    delayFeedbackSlider.labels.add({ 0.f, "0%" });
+    delayFeedbackSlider.labels.add({ 1.f, "95%" });
+
+    delayMixSlider.labels.add({ 0.f, "Dry" });
+    delayMixSlider.labels.add({ 1.f, "Wet" });
+
+    // Reverb
+    reverbSizeSlider.labels.add({ 0.f, "Small" });
+    reverbSizeSlider.labels.add({ 1.f, "Large" });
+
+    reverbDecaySlider.labels.add({ 0.f, "Short" });
+    reverbDecaySlider.labels.add({ 1.f, "Long" });
+
+    reverbMixSlider.labels.add({ 0.f, "Dry" });
+    reverbMixSlider.labels.add({ 1.f, "Wet" });
+
+
+    
     for( auto* comp : getComps() )
     {
         addAndMakeVisible(comp);
@@ -678,6 +744,10 @@ analyzerEnabledButtonAttachment(audioProcessor.apvts, "Analyzer Enabled", analyz
     peakBypassButton.setLookAndFeel(&lnf);
     highcutBypassButton.setLookAndFeel(&lnf);
     lowcutBypassButton.setLookAndFeel(&lnf);
+    compBypassButton.setLookAndFeel(&lnf);
+    distortionBypassButton.setLookAndFeel(&lnf);
+    delayBypassButton.setLookAndFeel(&lnf);
+    reverbBypassButton.setLookAndFeel(&lnf);
 
     analyzerEnabledButton.setLookAndFeel(&lnf);
     
@@ -716,6 +786,49 @@ analyzerEnabledButtonAttachment(audioProcessor.apvts, "Analyzer Enabled", analyz
             comp->highCutSlopeSlider.setEnabled( !bypassed );
         }
     };
+    
+    compBypassButton.onClick = [safePtr]()
+    {
+        if( auto* comp = safePtr.getComponent() )
+        {
+            auto bypassed = comp->compBypassButton.getToggleState();
+            comp->compThresholdSlider.setEnabled(!bypassed);
+            comp->compRatioSlider.setEnabled(!bypassed);
+            comp->compAttackSlider.setEnabled(!bypassed);
+            comp->compReleaseSlider.setEnabled(!bypassed);
+        }
+    };
+    
+    distortionBypassButton.onClick = [safePtr]()
+    {
+        if (auto* comp = safePtr.getComponent())
+        {
+            bool bypassed = comp->distortionBypassButton.getToggleState();
+            comp->distortionAmountSlider.setEnabled(!bypassed);
+        }
+    };
+
+    delayBypassButton.onClick = [safePtr]()
+    {
+        if (auto* comp = safePtr.getComponent())
+        {
+            bool bypassed = comp->delayBypassButton.getToggleState();
+            comp->delayTimeSlider.setEnabled(!bypassed);
+            comp->delayFeedbackSlider.setEnabled(!bypassed);
+            comp->delayMixSlider.setEnabled(!bypassed);
+        }
+    };
+
+    reverbBypassButton.onClick = [safePtr]()
+    {
+        if (auto* comp = safePtr.getComponent())
+        {
+            bool bypassed = comp->reverbBypassButton.getToggleState();
+            comp->reverbSizeSlider.setEnabled(!bypassed);
+            comp->reverbDecaySlider.setEnabled(!bypassed);
+            comp->reverbMixSlider.setEnabled(!bypassed);
+        }
+    };
 
     analyzerEnabledButton.onClick = [safePtr]()
     {
@@ -726,7 +839,7 @@ analyzerEnabledButtonAttachment(audioProcessor.apvts, "Analyzer Enabled", analyz
         }
     };
     
-    setSize (480, 800);
+    setSize (1000, 500);
     
     addAndMakeVisible(chatBox);
     
@@ -735,19 +848,19 @@ analyzerEnabledButtonAttachment(audioProcessor.apvts, "Analyzer Enabled", analyz
         chatBox.appendMessage("You", userInput);
 
         // Inject JSON state
-        juce::String jsonState = getEQStateJSON();
+        juce::String jsonState = getJSONFromParameters();
         juce::String modifiedInput = userInput + R"(
 
-        You are an expert audio engineer assistant. Your job is to listen to a user's prompt and output the appropriate EQ settings that would match the described genre, artist, or style. You will also be provided with the current state of the EQ settings in JSON format.
+        You are an expert audio engineer assistant. Your job is to listen to a user's prompt and output the appropriate EQ, compressor, distortion, delay, and reverb settings that would match the described genre, artist, or style. You will also be provided with the current state of the settings in JSON format.
 
         Please return:
-        1. A new JSON object (wrapped in triple backticks and marked as ```json) that contains the updated EQ settings.
+        1. A new JSON object (wrapped in triple backticks and marked as ```json ```) that contains the updated settings in the exact same format as they were provided.
         2. Then, after closing the code block, write a plain text explanation (no markdown, no formatting) on a new line. Do not include any backticks or formatting after the JSON block. Do not reopen or continue the code block after the explanation.
 
-        Here is the current EQ plugin state in JSON format:
+        Here is the current plugin state in JSON format, follow its structure exactly:
         )" + jsonState + R"(
 
-        Now, respond with the updated EQ parameters and explanation.
+        Now, respond with the updated parameters and explanation.
         )";
 
         chatClient.sendMessageAsync(modifiedInput);
@@ -805,7 +918,7 @@ analyzerEnabledButtonAttachment(audioProcessor.apvts, "Analyzer Enabled", analyz
 
             if (!jsonBlock.isEmpty()) {
                 //chatBox.appendMessage("Bot (JSON)", jsonBlock);
-                applyEQSettingsFromJSON(jsonBlock);  // <- Apply to plugin
+                applyParametersFromJSON(jsonBlock);  // <- Apply to plugin
             }
         });
     };
@@ -821,7 +934,7 @@ SimpleEQAudioProcessorEditor::~SimpleEQAudioProcessorEditor()
     analyzerEnabledButton.setLookAndFeel(nullptr);
 }
 
-juce::String SimpleEQAudioProcessorEditor::getEQStateJSON() const
+juce::String SimpleEQAudioProcessorEditor::getJSONFromParameters() const
 {
     juce::DynamicObject::Ptr root = new juce::DynamicObject();
     juce::Array<juce::var> eqParams;
@@ -864,12 +977,32 @@ juce::String SimpleEQAudioProcessorEditor::getEQStateJSON() const
     addParam("Peak Quality", "Q (Bandwidth)", "Q", {{0.1f, 10.f}}, std::nullopt, peakQualitySlider.getValue());
     addParam("HighCut Freq", "High Cut", "Hz", {{20, 20000}}, std::nullopt, highCutFreqSlider.getValue());
     addParam("HighCut Slope", "High Cut Slope", "dB/Oct", std::nullopt, {{12, 24, 36, 48}}, highCutSlopeSlider.getValue());
+    
+    addParam("Comp Threshold", "Compressor", "dB", {{-60.f, 0.f}}, std::nullopt, compThresholdSlider.getValue());
+    addParam("Comp Ratio", "Compressor", ":1", {{1.f, 20.f}}, std::nullopt, compRatioSlider.getValue());
+    addParam("Comp Attack", "Compressor", "ms", {{1.f, 100.f}}, std::nullopt, compAttackSlider.getValue());
+    addParam("Comp Release", "Compressor", "ms", {{10.f, 500.f}}, std::nullopt, compReleaseSlider.getValue());
+    
+    // Distortion
+    addParam("Distortion Amount", "Distortion", "", {{0.f, 1.f}}, std::nullopt, distortionAmountSlider.getValue());
+
+    // Delay
+    addParam("Delay Time", "Delay", "ms", {{1.f, 2000.f}}, std::nullopt, delayTimeSlider.getValue());
+    addParam("Delay Feedback", "Delay", "", {{0.f, 0.95f}}, std::nullopt, delayFeedbackSlider.getValue());
+    addParam("Delay Mix", "Delay", "%", {{0.f, 100.f}}, std::nullopt, delayMixSlider.getValue());
+
+    // Reverb
+    addParam("Reverb Size", "Reverb", "", {{0.f, 1.f}}, std::nullopt, reverbSizeSlider.getValue());
+    addParam("Reverb Decay", "Reverb", "s", {{0.f, 10.f}}, std::nullopt, reverbDecaySlider.getValue());
+    addParam("Reverb Mix", "Reverb", "%", {{0.f, 100.f}}, std::nullopt, reverbMixSlider.getValue());
 
     root->setProperty("eq_parameters", juce::var(eqParams));
+    
+    DBG(juce::JSON::toString(juce::var(root.get()), true));
     return juce::JSON::toString(juce::var(root.get()), true);
 }
 
-void SimpleEQAudioProcessorEditor::applyEQSettingsFromJSON(const juce::String& jsonString)
+void SimpleEQAudioProcessorEditor::applyParametersFromJSON(const juce::String& jsonString)
 {
     juce::var parsed = juce::JSON::parse(jsonString);
     if (!parsed.isObject())
@@ -962,50 +1095,83 @@ void SimpleEQAudioProcessorEditor::paint(juce::Graphics &g)
     drawSliderLabelBelow(g, peakQualitySlider, "Peak");
     drawSliderLabelBelow(g, highCutSlopeSlider, "HighCut");
     
+    drawSliderLabelBelow(g, compThresholdSlider, "Threshold");
+    drawSliderLabelBelow(g, compRatioSlider, "Ratio");
+    drawSliderLabelBelow(g, compAttackSlider, "Attack");
+    drawSliderLabelBelow(g, compReleaseSlider, "Release");
+    
+    drawSliderLabelBelow(g, distortionAmountSlider, "Distortion");
+    drawSliderLabelBelow(g, delayTimeSlider, "Time");
+    drawSliderLabelBelow(g, delayFeedbackSlider, "Feedback");
+    drawSliderLabelBelow(g, delayMixSlider, "Mix");
+    drawSliderLabelBelow(g, reverbSizeSlider, "Size");
+    drawSliderLabelBelow(g, reverbDecaySlider, "Decay");
+    drawSliderLabelBelow(g, reverbMixSlider, "Mix");
+
+    
     auto buildDate = Time::getCompilationDate().toString(true, false);
     auto buildTime = Time::getCompilationDate().toString(false, true);
     g.setFont(12);
-    g.drawFittedText("Build: " + buildDate + "\n" + buildTime, highCutSlopeSlider.getBounds().withY(6), Justification::topRight, 2);
+    auto topRightArea = getLocalBounds().removeFromTop(30).removeFromRight(150);
+    g.drawFittedText("Build: " + buildDate + "\n" + buildTime, topRightArea, Justification::topRight, 2);
 }
+
+
+
+
+
+
+
+
+
+
+
 
 void SimpleEQAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds();
-    bounds.removeFromTop(4);
+    bounds.removeFromTop(10);        // Top margin
+    bounds.removeFromLeft(10);       // Left padding
+    bounds.removeFromRight(10);      // Right padding
 
-    auto analyzerEnabledArea = bounds.removeFromTop(25);
-    analyzerEnabledArea.setWidth(50);
-    analyzerEnabledArea.setX(5);
-    analyzerEnabledArea.removeFromTop(2);
-    analyzerEnabledButton.setBounds(analyzerEnabledArea);
+    // Divide into thirds
+    auto thirdWidth = bounds.getWidth() / 3;
+    auto leftColumn = bounds.removeFromLeft(thirdWidth);
+    auto middleColumn = bounds.removeFromLeft(thirdWidth);
+    auto rightColumn = bounds;
 
-    bounds.removeFromTop(5);
+    // === LEFT COLUMN ===
 
-    float hRatio = 0.25f;
-    auto responseArea = bounds.removeFromTop(bounds.getHeight() * hRatio);
+//    auto analyzerEnabledArea = leftColumn.removeFromTop(25);
+//    analyzerEnabledArea.setWidth(50);
+//    analyzerEnabledArea.setX(5);
+//    analyzerEnabledButton.setBounds(analyzerEnabledArea);
+//    leftColumn.removeFromTop(15);
+
+    auto responseHeight = leftColumn.getHeight() * 0.5f;
+    auto responseArea = leftColumn.removeFromTop(responseHeight);
     responseCurveComponent.setBounds(responseArea);
 
-    bounds.removeFromTop(5);
+    chatBox.setBounds(leftColumn);
 
-    auto area = bounds.removeFromTop(bounds.getHeight() - 200); // Reserve for chat
-    auto columnWidth = area.getWidth() / 3;
+    // === MIDDLE COLUMN ===
+    middleColumn.removeFromTop(40);
+    auto eqArea = middleColumn.removeFromTop(middleColumn.getHeight() * 0.6f);
+    auto eqColumnWidth = eqArea.getWidth() / 3;
 
-    auto lowCutArea = area.removeFromLeft(columnWidth);
-    auto peakArea = area.removeFromLeft(columnWidth);
-    auto highCutArea = area;
+    const int largeKnobHeight = 100;
+    const int smallKnobHeight = 70;
+    const int knobPadding = 10;
 
-    // Allocate more height to cut filters
-    const int largeKnobHeight = 150;
-    const int smallKnobHeight = 90;
-    const int knobPadding = 15;
+    auto lowCutArea = eqArea.removeFromLeft(eqColumnWidth);
+    auto peakArea = eqArea.removeFromLeft(eqColumnWidth);
+    auto highCutArea = eqArea;
 
-    // LowCut Column (larger knobs)
     lowcutBypassButton.setBounds(lowCutArea.removeFromTop(25));
     lowCutFreqSlider.setBounds(lowCutArea.removeFromTop(largeKnobHeight));
     lowCutArea.removeFromTop(knobPadding);
     lowCutSlopeSlider.setBounds(lowCutArea.removeFromTop(largeKnobHeight));
 
-    // Peak Column (smaller knobs)
     peakBypassButton.setBounds(peakArea.removeFromTop(25));
     peakFreqSlider.setBounds(peakArea.removeFromTop(smallKnobHeight));
     peakArea.removeFromTop(knobPadding);
@@ -1013,16 +1179,69 @@ void SimpleEQAudioProcessorEditor::resized()
     peakArea.removeFromTop(knobPadding);
     peakQualitySlider.setBounds(peakArea.removeFromTop(smallKnobHeight));
 
-    // HighCut Column (larger knobs)
     highcutBypassButton.setBounds(highCutArea.removeFromTop(25));
     highCutFreqSlider.setBounds(highCutArea.removeFromTop(largeKnobHeight));
     highCutArea.removeFromTop(knobPadding);
     highCutSlopeSlider.setBounds(highCutArea.removeFromTop(largeKnobHeight));
 
-    // Chat box at the bottom
-    auto chatHeight = 200;
-    chatBox.setBounds(getLocalBounds().withTrimmedTop(getHeight() - chatHeight));
+    // Compressor Section
+    middleColumn.removeFromTop(25);
+    const int compBypassHeight = 25;
+    compBypassButton.setBounds(middleColumn.removeFromTop(compBypassHeight));
+    middleColumn.removeFromTop(5); // spacing
+
+    auto compKnobWidth = middleColumn.getWidth() / 4;
+    compThresholdSlider.setBounds(middleColumn.removeFromLeft(compKnobWidth));
+    compRatioSlider.setBounds(middleColumn.removeFromLeft(compKnobWidth));
+    compAttackSlider.setBounds(middleColumn.removeFromLeft(compKnobWidth));
+    compReleaseSlider.setBounds(middleColumn);
+
+    // === RIGHT COLUMN: Distortion, Delay (row), Reverb (row) ===
+
+    const int fxKnobSize = 90;
+    const int fxKnobSpacing = 10;
+    const int distortionKnobSize = 120;
+    const int fxSectionSpacing = 30; // more spacing between sections
+
+    // --- Distortion (solo knob) ---
+    auto distortionTop = rightColumn.removeFromTop(distortionKnobSize + 25 + fxKnobSpacing);
+    distortionBypassButton.setBounds(distortionTop.removeFromTop(25));
+    distortionAmountSlider.setBounds(distortionTop.withSizeKeepingCentre(distortionKnobSize, distortionKnobSize));
+
+    rightColumn.removeFromTop(fxSectionSpacing); // more separation from next section
+
+    // --- Delay (row of 3 knobs) ---
+    auto delayTop = rightColumn.removeFromTop(fxKnobSize + 25);
+    delayBypassButton.setBounds(delayTop.removeFromTop(25));
+
+    auto delayRow = delayTop;
+    auto delayKnobWidth = delayRow.getWidth() / 3;
+    delayTimeSlider.setBounds(delayRow.removeFromLeft(delayKnobWidth));
+    delayFeedbackSlider.setBounds(delayRow.removeFromLeft(delayKnobWidth));
+    delayMixSlider.setBounds(delayRow);
+
+    rightColumn.removeFromTop(fxSectionSpacing); // more separation from next section
+
+    // --- Reverb (row of 3 knobs) ---
+    auto reverbTop = rightColumn.removeFromTop(fxKnobSize + 25);
+    reverbBypassButton.setBounds(reverbTop.removeFromTop(25));
+
+    auto reverbRow = reverbTop;
+    auto reverbKnobWidth = reverbRow.getWidth() / 3;
+    reverbSizeSlider.setBounds(reverbRow.removeFromLeft(reverbKnobWidth));
+    reverbDecaySlider.setBounds(reverbRow.removeFromLeft(reverbKnobWidth));
+    reverbMixSlider.setBounds(reverbRow);
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1042,6 +1261,26 @@ std::vector<juce::Component*> SimpleEQAudioProcessorEditor::getComps()
         &lowcutBypassButton,
         &peakBypassButton,
         &highcutBypassButton,
-        &analyzerEnabledButton
+        &analyzerEnabledButton,
+        
+        &compThresholdSlider,
+        &compRatioSlider,
+        &compAttackSlider,
+        &compReleaseSlider,
+        &compBypassButton,
+        
+        &distortionAmountSlider,
+        &distortionBypassButton,
+        
+        &delayTimeSlider,
+        &delayFeedbackSlider,
+        &delayMixSlider,
+        &delayBypassButton,
+        
+        &reverbSizeSlider,
+        &reverbDecaySlider,
+        &reverbMixSlider,
+        &reverbBypassButton,
+
     };
 }

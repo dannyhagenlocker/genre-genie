@@ -97,28 +97,29 @@ void SimpleEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     // initialisation that you need..
     
     juce::dsp::ProcessSpec spec;
-    
     spec.maximumBlockSize = samplesPerBlock;
-    
     spec.numChannels = 1;
-    
     spec.sampleRate = sampleRate;
     
     leftChain.prepare(spec);
     rightChain.prepare(spec);
     
-    updateFilters();
+    // Compressor is stereo
+    spec.numChannels = getTotalNumOutputChannels();
+    compressor.prepare(spec);
+    
+    // Reverb is stereo
+    reverb.prepare(spec);
+
+    // Optional: set initial delay size
+    delayLine.setDelay(apvts.getRawParameterValue("Delay Time")->load());
+    delayLine.prepare(spec);
+    
+    updateSettings();
+    updateDelaySettings();
     
     leftChannelFifo.prepare(samplesPerBlock);
     rightChannelFifo.prepare(samplesPerBlock);
-    
-    osc.initialise([](float x) { return std::sin(x); });
-    
-    spec.numChannels = getTotalNumOutputChannels();
-    osc.prepare(spec);
-    osc.setFrequency(440);
-    
-    
 }
 
 void SimpleEQAudioProcessor::releaseResources()
@@ -153,48 +154,114 @@ bool SimpleEQAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts)
 }
 #endif
 
-void SimpleEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void SimpleEQAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
+        buffer.clear(i, 0, buffer.getNumSamples());
 
-    updateFilters();
-    
+    updateSettings();
+
     juce::dsp::AudioBlock<float> block(buffer);
-    
-//    buffer.clear();
-//
-//    for( int i = 0; i < buffer.getNumSamples(); ++i )
-//    {
-//        buffer.setSample(0, i, osc.processSample(0));
-//    }
-//
-//    juce::dsp::ProcessContextReplacing<float> stereoContext(block);
-//    osc.process(stereoContext);
-    
+
+    /**========================
+     *   1. Process EQ
+     *=========================*/
     auto leftBlock = block.getSingleChannelBlock(0);
     auto rightBlock = block.getSingleChannelBlock(1);
-    
+
     juce::dsp::ProcessContextReplacing<float> leftContext(leftBlock);
     juce::dsp::ProcessContextReplacing<float> rightContext(rightBlock);
-    
+
     leftChain.process(leftContext);
     rightChain.process(rightContext);
-    
+
+    /**========================
+     *   2. Compressor
+     *=========================*/
+    if (!apvts.getRawParameterValue("Comp Bypassed")->load())
+    {
+        juce::dsp::ProcessContextReplacing<float> context(block);
+        compressor.process(context);
+    }
+
+    /**========================
+     *   3. Distortion
+     *=========================*/
+    if (!apvts.getRawParameterValue("Distortion Bypassed")->load())
+    {
+        float amount = apvts.getRawParameterValue("Distortion Amount")->load();
+        distortion.functionToUse = [amount](float x)
+        {
+            return std::tanh(amount * x);
+        };
+
+        auto numChannels = block.getNumChannels();
+        auto numSamples = block.getNumSamples();
+
+        for (size_t ch = 0; ch < numChannels; ++ch)
+        {
+            for (size_t i = 0; i < numSamples; ++i)
+            {
+                auto sample = block.getSample(ch, i);
+                block.setSample(ch, i, distortion.functionToUse(sample));
+            }
+        }
+    }
+
+
+
+    /**========================
+     *   4. Delay
+     *=========================*/
+    if (!apvts.getRawParameterValue("Delay Bypassed")->load() && false)
+    {
+        auto delayTimeMs = apvts.getRawParameterValue("Delay Time")->load();
+        auto delayTimeSamples = static_cast<int>(getSampleRate() * delayTimeMs / 1000.0f);
+        delayLine.setDelay(delayTimeSamples);
+
+        auto feedback = apvts.getRawParameterValue("Delay Feedback")->load();
+        auto mix = apvts.getRawParameterValue("Delay Mix")->load();
+
+        for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+        {
+            auto* channelData = buffer.getWritePointer(channel);
+            for (int i = 0; i < buffer.getNumSamples(); ++i)
+            {
+                auto delayed = delayLine.popSample(0);
+                auto input = channelData[i];
+                delayLine.pushSample(0, input + delayed * feedback);
+                channelData[i] = input * (1.0f - mix) + delayed * mix;
+            }
+        }
+    }
+
+    /**========================
+     *   5. Reverb
+     *=========================*/
+    if (!apvts.getRawParameterValue("Reverb Bypassed")->load())
+    {
+        juce::dsp::Reverb::Parameters params;
+        params.roomSize = apvts.getRawParameterValue("Reverb Size")->load();
+        params.wetLevel = apvts.getRawParameterValue("Reverb Mix")->load();
+        params.dryLevel = 1.0f - params.wetLevel;
+        params.damping  = juce::jlimit(0.0f, 1.0f, apvts.getRawParameterValue("Reverb Decay")->load() / 10.0f);
+        reverb.setParameters(params);
+
+        juce::dsp::ProcessContextReplacing<float> context(block);
+        reverb.process(context);
+    }
+
+    /**========================
+     *   Final: FFT Visualization
+     *=========================*/
     leftChannelFifo.update(buffer);
     rightChannelFifo.update(buffer);
-    
 }
+
 
 //==============================================================================
 bool SimpleEQAudioProcessor::hasEditor() const
@@ -227,7 +294,7 @@ void SimpleEQAudioProcessor::setStateInformation (const void* data, int sizeInBy
     if( tree.isValid() )
     {
         apvts.replaceState(tree);
-        updateFilters();
+        updateSettings();
     }
 }
 
@@ -301,39 +368,58 @@ void SimpleEQAudioProcessor::updateHighCutFilters(const ChainSettings &chainSett
     updateCutFilter(rightHighCut, highCutCoefficients, chainSettings.highCutSlope);
 }
 
-void SimpleEQAudioProcessor::updateFilters()
+void SimpleEQAudioProcessor::updateSettings()
 {
     auto chainSettings = getChainSettings(apvts);
     
     updateLowCutFilters(chainSettings);
     updatePeakFilter(chainSettings);
     updateHighCutFilters(chainSettings);
+    updateCompressorSettings();
+    updateDistortionSettings();
+    updateDelaySettings();
+    updateReverbSettings();
+}
+
+void SimpleEQAudioProcessor::updateCompressorSettings() {
+    compressor.setThreshold(apvts.getRawParameterValue("Comp Threshold")->load());
+    compressor.setRatio(apvts.getRawParameterValue("Comp Ratio")->load());
+    compressor.setAttack(apvts.getRawParameterValue("Comp Attack")->load());
+    compressor.setRelease(apvts.getRawParameterValue("Comp Release")->load());
+}
+
+void SimpleEQAudioProcessor::updateDistortionSettings() {
+}
+
+void SimpleEQAudioProcessor::updateDelaySettings() {
+}
+
+void SimpleEQAudioProcessor::updateReverbSettings() {
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::createParameterLayout()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     
+    /* EQUALIZER */
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "LowCut Freq", 1 },
                                                            "LowCut Freq",
                                                            juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f),
                                                            20.f));
-    
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "HighCut Freq", 1 },
                                                            "HighCut Freq",
                                                            juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f),
                                                            20000.f));
-    
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "Peak Freq", 1 },
                                                            "Peak Freq",
                                                            juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f),
                                                            750.f));
-    
+
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "Peak Gain", 1 },
                                                            "Peak Gain",
                                                            juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),
                                                            0.0f));
-    
+
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "Peak Quality", 1 },
                                                            "Peak Quality",
                                                            juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f),
@@ -355,6 +441,40 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::crea
     layout.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID { "Peak Bypassed", 1 }, "Peak Bypassed", false));
     layout.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID { "HighCut Bypassed", 1 }, "HighCut Bypassed", false));
     layout.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID { "Analyzer Enabled", 1 }, "Analyzer Enabled", true));
+    
+    /* COMPRESSOR */
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "Comp Threshold", 1 }, "Comp Threshold",
+        juce::NormalisableRange<float>(-60.f, 0.f, 1.f), -24.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "Comp Ratio", 1 }, "Comp Ratio",
+        juce::NormalisableRange<float>(1.f, 20.f, 0.1f), 4.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "Comp Attack", 1 }, "Comp Attack",
+        juce::NormalisableRange<float>(1.f, 100.f, 0.1f), 20.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "Comp Release", 1 }, "Comp Release",
+        juce::NormalisableRange<float>(10.f, 500.f, 0.1f), 250.f));
+    layout.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID { "Comp Bypassed", 1 }, "Comp Bypassed", false));
+    
+    /* DISTORTION */
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "Distortion Amount", 1 }, "Distortion Amount",
+        juce::NormalisableRange<float>(1.f, 10.f, 0.1f), 1.0f));
+    layout.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID { "Distortion Bypassed", 1}, "Distortion Bypassed", false));
+
+    /* DELAY */
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "Delay Time", 1 }, "Delay Time",
+        juce::NormalisableRange<float>(1.f, 750.f, 1.f), 500.f)); // in ms
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "Delay Feedback", 1 }, "Delay Feedback",
+        juce::NormalisableRange<float>(0.0f, 0.95f, 0.01f), 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "Delay Mix", 1 }, "Delay Mix",
+        juce::NormalisableRange<float>(0.f, 1.f, 0.01f), 0.3f));
+    layout.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID { "Delay Bypassed", 1 }, "Delay Bypassed", false));
+    
+    /* REVERB */
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "Reverb Size", 1 }, "Reverb Size",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "Reverb Decay", 1 }, "Reverb Decay",
+        juce::NormalisableRange<float>(0.1f, 10.0f, 0.1f), 1.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "Reverb Mix", 1 }, "Reverb Mix",
+        juce::NormalisableRange<float>(0.f, 1.f, 0.01f), 0.3f));
+    layout.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID { "Reverb Bypassed", 1 }, "Reverb Bypassed", false));
     
     return layout;
 }

@@ -9,7 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-
+#include <functional>
 #include <array>
 template<typename T>
 struct Fifo
@@ -283,19 +283,31 @@ public:
     SingleChannelSampleFifo<BlockType> leftChannelFifo { Channel::Left };
     SingleChannelSampleFifo<BlockType> rightChannelFifo { Channel::Right };
 private:
+    // Equalizer
     MonoChain leftChain, rightChain;
     
+    // Compressor
+    juce::dsp::Compressor<float> compressor;
+    
+    // Distortion
+    juce::dsp::WaveShaper<float, std::function<float(float)>> distortion;
+    
+    // Delay
+    juce::dsp::DelayLine<float> delayLine { 44100 }; // 1 second max at 44.1kHz
+    
+    // Reverb
+    juce::dsp::Reverb reverb;
+    
     void updatePeakFilter(const ChainSettings& chainSettings);
-
-    
-    
-    
     void updateLowCutFilters(const ChainSettings& chainSettings);
     void updateHighCutFilters(const ChainSettings& chainSettings);
+    void updateSettings();
+    void updateCompressorSettings();
+    void updateDistortionSettings();
+    void updateDelaySettings();
+    void updateReverbSettings();
     
-    void updateFilters();
     
-    juce::dsp::Oscillator<float> osc;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleEQAudioProcessor)
 };
